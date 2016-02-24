@@ -1,6 +1,9 @@
 #simple script to extract all CDS from information from genbank fileNames
 
 import os,platform, subprocess
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 if 'Darwin' in platform.system():
     os.chdir("/Users/louis/Desktop/bioinformatics/")
@@ -10,11 +13,19 @@ elif 'Windows' in platform.system():
 readseqLoc = "/Users/louis/Desktop/readseq.jar"
 
 def getGbInf(fileName):
-    os.chdir(fileName[:fileName.rfind('/')+1]
-    callText = "java -cp {0} run -f=8  -o= {1} -feat=CDS {2}".format(
-        readseqLoc,os.path.splitext(fileName)[0]+".fasta",fileName)
-    print callText
-    subprocess.call(callText,shell=True)
+    record = SeqIO.parse(fileName,"genbank")
+    FastaRec = []
+    for i in record:
+        if i.features:
+            for feature in i.features:
+                if feature.type == "CDS":
+
+                    FastaRec.append(SeqRecord(feature.location.extract(i).seq,
+                                    id=str(feature.qualifiers.get("protein_id", "???"))))
+    SeqIO.write(FastaRec, os.path.splitext(fileName)[0]+".fasta","fasta")
+
+
+    #subprocess.call(callText,shell=True)
 
     return
 
@@ -25,11 +36,8 @@ def crawl(folder):
     for path,subdirs,files in os.walk(folder):
         for name in files:
             fileName = os.path.join(path,name).replace('\\', '/')
-            fileName = fileName.replace("]","\]")
-            fileName = fileName.replace('[','\[')
-            fileName = fileName.replace(' ', '\ ')
             if ".gb" in fileName and ".DS_Store" not in fileName:
                 getGbInf(fileName)
     return
 
-crawl("./pretest folder")
+crawl("./pretest_folder")
