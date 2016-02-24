@@ -13,19 +13,21 @@ elif 'Windows' in platform.system():
 readseqLoc = "/Users/louis/Desktop/readseq.jar"
 
 def getGbInf(fileName):
-    record = SeqIO.parse(fileName,"genbank")
-    FastaRec = []
-    for i in record:
-        if i.features:
-            for feature in i.features:
-                if feature.type == "CDS":
+    try:
+        record = SeqIO.parse(fileName,"genbank")
+        FastaRec = []
+        for i in record:
+            if i.features:
+                for feature in i.features:
+                    if feature.type == "CDS":
+                        FastaRec.append(
+                            SeqRecord(feature.location.extract(i).seq,
+                            id=str(feature.qualifiers.get("protein_id", "???"))))
 
-                    FastaRec.append(SeqRecord(feature.location.extract(i).seq,
-                                    id=str(feature.qualifiers.get("protein_id", "???"))))
-    SeqIO.write(FastaRec, os.path.splitext(fileName)[0]+".fasta","fasta")
+        SeqIO.write(FastaRec, os.path.splitext(fileName)[0]+".fasta","fasta")
+    except:
+        print fileName
 
-
-    #subprocess.call(callText,shell=True)
 
     return
 
@@ -40,4 +42,4 @@ def crawl(folder):
                 getGbInf(fileName)
     return
 
-crawl("./pretest_folder")
+crawl("./research_project")
