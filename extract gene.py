@@ -5,8 +5,10 @@
 
 import os,platform
 from Bio import SeqIO
+import Bio.Align.Applications
+import subprocess
 
-if 'Darwin' in platform.system():
+if 'Darwin ' in platform.system():
     os.chdir("/Users/louis/Desktop/bioinformatics/")
 elif 'Windows' in platform.system():
     os.chdir("F:/bioinformatics")
