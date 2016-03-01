@@ -42,4 +42,4 @@ def crawl(folder):
                 getGbInf(fileName)
     return
 
-crawl("./research_project")
+crawl("./pretest_folder")
