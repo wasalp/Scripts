@@ -1,10 +1,10 @@
 
-import os,platform, subprocess
-from Bio import SeqIO
+import os,platform, subprocess, sys, Levenshtein, csv
+from Bio import SeqIO, AlignIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio import pairwise2
-from Bio.pairwise2 import format_alignment
+from Bio.Align.Applications import MuscleCommandline
+
 if 'Darwin' in platform.system():
     os.chdir("/Users/louis/Desktop/bioinformatics/")
 elif 'Windows' in platform.system():
@@ -13,25 +13,43 @@ elif 'Windows' in platform.system():
 
 def compareAlign(fileName):
     FastaRec = []
+
     foldName = fileName[:fileName.rfind('/')+1]
     for file in os.listdir(foldName):
         if '_refseq.fasta' in file:
             ref = foldName+file
     refSeq = SeqIO.parse(ref,"fasta").next()
     record = SeqIO.parse(fileName,"fasta")
-    print fileName
-    alignEm(refSeq,record)
+    score =[]
+    x=0
+    fileName = fileName.replace("][",'_')
+    fileName = fileName.replace('[','')
+    fileName = fileName.replace(']','')
+    with open(os.path.splitext(fileName)[0]+'.csv','wb') as f:
+        writer = csv.writer(f)
+        writer.writerow(["index","score"])
+        for i in record:
+            simi = [x , alignEm(refSeq,i)]
+            writer.writerow(simi)
+
     return
 
 def alignEm(refSeq, record):
+    try:
+        muscle_cline = MuscleCommandline("../muscle",maxiters= 1, diags=True)
+        child = subprocess.Popen(str(muscle_cline),
+                                stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                universal_newlines=True,
+                                shell=True)
 
-    for i in record:
-        for a in pairwise2.align.globalxx(refSeq.seq, i.seq):
-            print (format_alignment(*a))
-        break
-
-
-    return
+        SeqIO.write([refSeq,record],child.stdin,"fasta")
+        child.stdin.close()
+        align = AlignIO.read(child.stdout,"fasta")
+        return Levenshtein.ratio(str(align[0].seq), str(align[1].seq))
+    except:
+        return 0
 
 
 def crawl(folder):
@@ -46,4 +64,4 @@ def crawl(folder):
     return
 
 
-crawl("./pretest_folder")
+crawl("./research_project")
