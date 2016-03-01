@@ -25,6 +25,8 @@ def compareAlign(fileName):
     fileName = fileName.replace("][",'_')
     fileName = fileName.replace('[','')
     fileName = fileName.replace(']','')
+
+    fileName = foldName + fileName[fileName.rfind('/')+1:]
     with open(os.path.splitext(fileName)[0]+'.csv','wb') as f:
         writer = csv.writer(f)
         writer.writerow(["index","score"])
