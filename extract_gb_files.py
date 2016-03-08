@@ -10,7 +10,6 @@ if 'Darwin' in platform.system():
 elif 'Windows' in platform.system():
     os.chdir("F:/bioinformatics")
 
-readseqLoc = "/Users/louis/Desktop/readseq.jar"
 
 def getGbInf(fileName):
     try:
@@ -42,4 +41,4 @@ def crawl(folder):
                 getGbInf(fileName)
     return
 
-crawl("./pretest_folder")
+crawl("./research_project")

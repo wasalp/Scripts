@@ -1,17 +1,19 @@
 #voici mon script pour trouver les termes GO de mes genes
 
 
-import pymysql, os, uniprot, pprint, csv,urllib2, time
+import pymysql, os, uniprot, pprint, csv,urllib2, time,platform
 from operator import itemgetter
 from itertools import groupby
 
-
-os.chdir("/Users/louis/Desktop/bioinformatics/research project")
+if 'Darwin' in platform.system():
+    os.chdir("/Users/louis/Desktop/bioinformatics/")
+elif 'Windows' in platform.system():
+    os.chdir("F:/bioinformatics")
 
 #cette fonction va trouver mes fichier CSV qui contienne la liste des genes
 #pour chacun des genomes de virus obtenu
 def findCSV(): #will search through subdirectories of a certain root and will send the csv files
-    for path, subdirs, files in os.walk("/Users/louis/Desktop/bioinformatics/research project"):
+    for path, subdirs, files in os.walk("./research_project"):
         for name in files:
             if name[0:len(name)-4].find(".") == -1 :#so we don't analyse hidden files
                 fileNames = os.path.join(path,name).replace('\\', '/')#clean the file name
@@ -56,7 +58,7 @@ def GetGoAnnotation(seqids):
     List = list(map(itemgetter(0), groupby(List)))
     GO = list(map(itemgetter(0), groupby(GO)))
     db.close()
-    return[seqids,List,GO,Type]
+    return[seqids,List,GO]
 
 #cette fonction utilise un script ecrit par quelqu'un qui va prendre un
 #Refseq_protein et va obtenir des uniprotID(si disponible)
@@ -100,11 +102,11 @@ def protIDret(path):
         #ouverture de chaque element de la liste
         for i in  your_list:
             #ecriture du header
-            if i[0].find("Accession") != -1:
-                writer.writerow(["Type","Accession","Protein","Protein_id","Hits","UniprotID", "Terms","GO code"])
+            if i[1].find("Accession") != -1:
+                writer.writerow([ "Virus","Accession","Protein","Protein_id","Hits","UniprotID", "Terms","GO code"])
             else:
                 #appelle a la fonction qui obtien les uniprotID pour chaque Refseq_protein
-                for c,k,v in getUNIPid(i[2]):
+                for c,k,v in getUNIPid(i[3]):
                     i.append(c)
                     i.append(k)
                     i.append(v)

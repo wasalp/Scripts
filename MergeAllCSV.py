@@ -1,17 +1,19 @@
 #This is a simple program that will find all csv files in subfolders and append
 #them together
 
-import csv,os
+import csv,os,platform
 
-
-os.chdir("/Users/louis/Desktop/bioinformatics/research project")
+if 'Darwin' in platform.system():
+    os.chdir("/Users/louis/Desktop/bioinformatics/")
+elif 'Windows' in platform.system():
+    os.chdir("F:/bioinformatics")
 
 
 def protIDret():
-    with open('/Users/louis/Desktop/bioinformatics/research project/allMerged.csv','wb') as p:
+    with open('./research_project/allMerged.csv','wb') as p:
         writer = csv.writer(p)
-        writer.writerow(["Type","Accession","Protein","Protein_id","Hits","uniprotID","Terms","GO code"])
-        for path, subdirs, files in os.walk("/Users/louis/Desktop/bioinformatics/research project/virus sequences"):#I plan on putting a prompt where you specify where your sequences are
+        writer.writerow(["Type","Virus","Accession","Protein","Protein_id","Hits","uniprotID","Terms","GO code"])
+        for path, subdirs, files in os.walk("./research_project/virus_sequences"):#I plan on putting a prompt where you specify where your sequences are
             for name in files:
                 if name[0:len(name)-4].find(".") == -1 :#so we don't analyse hidden files
                     fileNames = os.path.join(path,name).replace('\\', '/')#clean the file name
@@ -21,7 +23,7 @@ def protIDret():
                             if outPutName.find("Users") != -1:
                                 ViralType = outPutName.split("/")[7]
                             else:
-                                ViralType = outPutName.split("/")[4]
+                                ViralType = outPutName.split("/")[3]
                             print(ViralType)
                             print(outPutName+'.csv')#to follow along in the terminal
 
@@ -31,7 +33,7 @@ def protIDret():
                                 your_list = list(reader)
 
                             for i in  your_list:
-                                if i[0].find("Accession") == -1:
+                                if i[1].find("Accession") == -1:
                                     i.insert( 0 , ViralType )
                                     writer.writerow(i)
 

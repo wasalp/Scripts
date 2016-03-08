@@ -1,12 +1,15 @@
-import sys,os,csv,time
+import sys,os,csv,time, platform
 from Bio import SeqIO
 from Bio.Blast import NCBIXML
 from Bio import Entrez
-os.chdir("F:/bioinformatics")
 
+if 'Darwin' in platform.system():
+    os.chdir("/Users/louis/Desktop/bioinformatics/")
+elif 'Windows' in platform.system():
+    os.chdir("F:/bioinformatics")
 def GetFiles():
 
-    for path, subdirs, files in os.walk("F:/bioinformatics/research project/virus sequences"):#I plan on putting a prompt where you specify where your sequences are
+    for path, subdirs, files in os.walk("./research_project/virus_sequences"):#I plan on putting a prompt where you specify where your sequences are
         for name in files:
             if name[0:len(name)-8].find(".") == -1 :#so we don't analyse hidden files
                 PathName = path.replace('\\','/')
@@ -18,7 +21,7 @@ def GetFiles():
     return
 
 def XMLparse(Path,File):
-    E_VALUE = pow(10,-5)
+    E_VALUE = pow(10,-20)
     result = NCBIXML.parse(open(File))
     #gi|353260843|gb|JN555585.1|
     r = os.path.splitext(File)[0]
@@ -29,21 +32,16 @@ def XMLparse(Path,File):
         os.mkdir(Path)
     except WindowsError:
         print "already exists"
-        
+
     for blast_record in result:
 #create a folder for all the genes of our virus(probably at a previous point in the script)
         queryName = blast_record.query
-        protein = queryName[queryName.find("protein=")-1:queryName.find("]", queryName.find("protein="))+1]
-        protein = protein.replace('/', '_')
-        protID = queryName[queryName.find("protein_id=")-1:queryName.find("]", queryName.find("protein_id="))+1]
-        if len(protein) > 150:
-            protein = queryName[queryName.find("gene=")-1:queryName.find("]", queryName.find("gene="))+1]
-        FoldName = '[' + protein[protein.find("=")+1:] + '[' + protID[12:]
+        protID = queryName[queryName.find("protein_id="):queryName.find("]", queryName.find("protein_id="))]
+        FoldName =  protID[11:]
         print FoldName
         print Path
         try:
-            
-        
+
 #create a folder for each individual gene(extract either from each blast record(if possible) or from the fasta file
 #get multi-genbank file of each hit with the accession number(already works)
         #List of accession number from BLAST hits
@@ -52,9 +50,9 @@ def XMLparse(Path,File):
                 AccList.append(alignment.hit_id.split("|")[3])
             os.mkdir(Path + '/' + FoldName)
             handlez = FetchGB(AccList)
-            
+
             with open(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb",'wb') as f:
-                
+
                 for line in handlez:
                     f.write(line)
             time.sleep(15)
@@ -62,10 +60,10 @@ def XMLparse(Path,File):
             if len(FoldName) < 100:
                 if os.path.isfile(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb"):
                     if os.stat(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb").st_size < 300:
-                
+
                         handlez = FetchGB(AccList)
                         with open(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb",'wb') as f:
-                    
+
                             for line in handlez:
                                 f.write(line)
                 else:
@@ -83,7 +81,7 @@ def CDSEx(NameFile, protein):
     print "1"
 
 
-    return []        
+    return []
 
 def FetchGB(AccList):
 
@@ -95,8 +93,12 @@ def FetchGB(AccList):
 
 
     query = " ".join(AccList)
+    handle = Entrez.esearch( db=db,term=query,retmax=retmax )
     while True:
         try:
+            print query
+            if not query:
+                break
             sys.stderr.write( "Fetching entries from GenBank")
             handle = Entrez.esearch( db=db,term=query,retmax=retmax )
             giList = Entrez.read(handle)['IdList']
@@ -111,6 +113,7 @@ def FetchGB(AccList):
       #fetch entries in batch
                   handle = Entrez.efetch(db=db, rettype="gb", retstart=start,
                                       retmax=batchSize, webenv=webenv, query_key=query_key)
+
       #print output to stdout
             break
         except:

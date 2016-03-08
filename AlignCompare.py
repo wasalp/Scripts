@@ -1,5 +1,5 @@
 
-import os,platform, subprocess, sys, Levenshtein, csv
+import os,platform, subprocess, sys, Levenshtein, csv, multiprocessing
 from Bio import SeqIO, AlignIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
@@ -12,39 +12,35 @@ elif 'Windows' in platform.system():
 
 
 def compareAlign(fileName):
-    FastaRec = []
+    print fileName
+    with open(os.path.splitext(fileName)[0] + "_filtered.fasta",'wb') as h:
+        FastaRec = []
+        foldName = fileName[:fileName.rfind('/')+1]
+        for file in os.listdir(foldName):
+            if '_refseq.fasta' in file:
+                ref = foldName+file
+        refSeq = SeqIO.parse(ref,"fasta").next()
+        record = SeqIO.parse(fileName,"fasta")
+        score =[]
 
-    foldName = fileName[:fileName.rfind('/')+1]
-    for file in os.listdir(foldName):
-        if '_refseq.fasta' in file:
-            ref = foldName+file
-    refSeq = SeqIO.parse(ref,"fasta").next()
-    record = SeqIO.parse(fileName,"fasta")
-    score =[]
-    x=0
-    fileName = fileName.replace("][",'_')
-    fileName = fileName.replace('[','')
-    fileName = fileName.replace(']','')
-
-    fileName = foldName + fileName[fileName.rfind('/')+1:]
-    with open(os.path.splitext(fileName)[0]+'.csv','wb') as f:
-        writer = csv.writer(f)
-        writer.writerow(["index","score"])
+        fileName = foldName + fileName[fileName.rfind('/')+1:]
         for i in record:
-            simi = [x , alignEm(refSeq,i)]
-            writer.writerow(simi)
+            if alignEm(refSeq,i) >= 0.7:
+                print i
+                FastaRec.append(i)
 
+        SeqIO.write(FastaRec, os.path.splitext(fileName)[0] + "_filtered.fasta" ,"fasta")
     return
 
 def alignEm(refSeq, record):
     try:
-        muscle_cline = MuscleCommandline("../muscle",maxiters= 1, diags=True)
+        muscle_cline = MuscleCommandline("../muscle.exe",maxiters= 1, diags=True)
         child = subprocess.Popen(str(muscle_cline),
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
-                                universal_newlines=True,
-                                shell=True)
+                                universal_newlines=False,
+                                shell=False)
 
         SeqIO.write([refSeq,record],child.stdin,"fasta")
         child.stdin.close()
@@ -55,14 +51,14 @@ def alignEm(refSeq, record):
 
 
 def crawl(folder):
-
     for path,subdirs,files in os.walk(folder):
         for name in files:
             fileName = os.path.join(path,name).replace('\\', '/')
             if ".fasta" in fileName and ".DS_Store" not in fileName:
                 if "_genes" in fileName and ".gb" not in fileName:
-                    if "_refseq" not in fileName:
+                    if fileName.find("refseq") == -1 :
                         compareAlign(fileName)
+
     return
 
 
