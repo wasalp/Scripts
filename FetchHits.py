@@ -9,7 +9,7 @@ elif 'Windows' in platform.system():
     os.chdir("F:/bioinformatics")
 def GetFiles():
 
-    for path, subdirs, files in os.walk("./research_project/virus_sequences"):#I plan on putting a prompt where you specify where your sequences are
+    for path, subdirs, files in os.walk("./project_temp"):#I plan on putting a prompt where you specify where your sequences are
         for name in files:
             if name[0:len(name)-8].find(".") == -1 :#so we don't analyse hidden files
                 PathName = path.replace('\\','/')
@@ -30,7 +30,7 @@ def XMLparse(Path,File):
     Path = Path + s[: s.find('_')+1] + 'genes'
     try:
         os.mkdir(Path)
-    except WindowsError:
+    except:
         print "already exists"
 
     for blast_record in result:
@@ -40,38 +40,42 @@ def XMLparse(Path,File):
         FoldName =  protID[11:]
         print FoldName
         print Path
-        try:
+        if ("NP_062890.1" in FoldName or "NP_062888.1" in FoldName or "NP_056796.1" in FoldName
+          or "NP_056794.1" in FoldName or "NP_066246.1" in FoldName or "NP_066244.1" in FoldName
+          or "NP_041332.1" in FoldName or "NP_041327.1" in FoldName or "YP_003708381.1" in FoldName
+          or "YP_003708382.1" in FoldName or "YP_001129462.1" in FoldName or "YP_001129465.1" in FoldName):
+            try:
 
-#create a folder for each individual gene(extract either from each blast record(if possible) or from the fasta file
-#get multi-genbank file of each hit with the accession number(already works)
-        #List of accession number from BLAST hits
-            AccList = list()
-            for alignment in blast_record.alignments:
-                AccList.append(alignment.hit_id.split("|")[3])
-            os.mkdir(Path + '/' + FoldName)
-            handlez = FetchGB(AccList)
+    #create a folder for each individual gene(extract either from each blast record(if possible) or from the fasta file
+    #get multi-genbank file of each hit with the accession number(already works)
+            #List of accession number from BLAST hits
+                AccList = list()
+                for alignment in blast_record.alignments:
+                    AccList.append(alignment.hit_id.split("|")[3])
+                os.mkdir(Path + '/' + FoldName)
+                handlez = FetchGB(AccList)
 
-            with open(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb",'wb') as f:
+                with open(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb",'wb') as f:
 
-                for line in handlez:
-                    f.write(line)
-            time.sleep(15)
-        except WindowsError:
-            if len(FoldName) < 100:
-                if os.path.isfile(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb"):
-                    if os.stat(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb").st_size < 300:
+                    for line in handlez:
+                        f.write(line)
+                time.sleep(15)
+            except:
+                if len(FoldName) < 100:
+                    if os.path.isfile(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb"):
+                        if os.stat(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb").st_size < 300:
 
+                            handlez = FetchGB(AccList)
+                            with open(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb",'wb') as f:
+
+                                for line in handlez:
+                                    f.write(line)
+                    else:
                         handlez = FetchGB(AccList)
                         with open(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb",'wb') as f:
-
                             for line in handlez:
                                 f.write(line)
-                else:
-                    handlez = FetchGB(AccList)
-                    with open(Path + '/' + FoldName + '/' + FoldName + "_Fetch.gb",'wb') as f:
-                        for line in handlez:
-                            f.write(line)
-            print "already exists"
+                print "already exists"
         #CDSEx(Path+ '/' + FoldName + "_Feth.gb", protein[7:])
     result.close()
     return
@@ -87,7 +91,7 @@ def FetchGB(AccList):
 
     db = "nucleotide"
     Entrez.email = "louisparent@gmail.com"
-    batchSize = 20
+    batchSize = 3000
     retmax = 10**9
 
 
@@ -100,7 +104,7 @@ def FetchGB(AccList):
             if not query:
                 break
             sys.stderr.write( "Fetching entries from GenBank")
-            handle = Entrez.esearch( db=db,term=query,retmax=retmax )
+
             giList = Entrez.read(handle)['IdList']
             sys.stderr.write( "Found %s GI: %s\n" % (len(giList), ", ".join(giList[:10])))
     #post NCBI query

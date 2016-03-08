@@ -34,13 +34,13 @@ def compareAlign(fileName):
 
 def alignEm(refSeq, record):
     try:
-        muscle_cline = MuscleCommandline("../muscle.exe",maxiters= 1, diags=True)
+        muscle_cline = MuscleCommandline("../muscle",maxiters= 1, diags=True)
         child = subprocess.Popen(str(muscle_cline),
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 universal_newlines=False,
-                                shell=False)
+                                shell=True)
 
         SeqIO.write([refSeq,record],child.stdin,"fasta")
         child.stdin.close()
@@ -55,11 +55,11 @@ def crawl(folder):
         for name in files:
             fileName = os.path.join(path,name).replace('\\', '/')
             if ".fasta" in fileName and ".DS_Store" not in fileName:
-                if "_genes" in fileName and ".gb" not in fileName:
-                    if fileName.find("refseq") == -1 :
+                if "_genes" in fileName and ".gb" not in fileName and "_filtered" not in fileName:
+                    if fileName.find("refseq") == -1 and "YP_001129465.1" in fileName:
                         compareAlign(fileName)
 
     return
 
 
-crawl("./research_project")
+crawl("./project_temp")

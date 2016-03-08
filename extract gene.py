@@ -69,4 +69,4 @@ def readseqGB():
 
 
 print os.getcwd()
-crawl("./pretest_folder")
+crawl("./project_temp")
