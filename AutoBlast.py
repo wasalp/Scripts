@@ -1,4 +1,4 @@
-import os, math, csv,sys
+import os, math, csv,sys,reparseBlast,sqlGotestnew
 from Bio.Blast.Applications import NcbiblastxCommandline
 from Bio.Blast import NCBIXML
 os.chdir("F:/bioinformatics/research_project/virus_sequences")
@@ -28,3 +28,5 @@ def blastn(name): #this function will takes a filepath of a fasta file as an arg
 
 
 blastAll()
+reparseBlast.startReparse()
+sqlGotestnew.findCSV()

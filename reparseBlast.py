@@ -75,6 +75,3 @@ def writeCSV(Path, Dict):
         writer.writerow(RowList)
 
     return["done"]
-
-startReparse()
-sqlGotestnew.findCSV()
