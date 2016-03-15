@@ -17,7 +17,10 @@ def blastAll(): #will search through subdirectories of a certain root and will s
 def blastn(name): #this function will takes a filepath of a fasta file as an argument and does a local blastn with the nt database
     outPutName = os.path.splitext(name)[0] #this is simply a variable to name the XML output file
     E_VALUE = pow(10,-40)
-    blast = NcbiblastxCommandline(cmd = "blastn", query= name, db="D:/database/nt/nt", evalue= E_VALUE, outfmt=5, out= outPutName + ".xml")
+    blast = NcbiblastxCommandline(cmd = "blastn", query= name,
+                                db="D:/database/nt/nt", evalue= E_VALUE,
+                                outfmt=5, out= outPutName + ".xml",
+                                maxtargetseqs= 100000)
     print('blasting '+ name)
     stdout,stderr = blast()
 

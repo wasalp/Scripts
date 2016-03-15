@@ -1,5 +1,6 @@
-import os, math, csv,platform
+import os, math, csv,platform, pymysql, os, uniprot, pprint, csv, urllib2, time,platform
 from Bio.Blast import NCBIXML
+import sqlGotestnew
 
 if 'Darwin' in platform.system():
     os.chdir("/Users/louis/Desktop/bioinformatics/")
@@ -19,7 +20,7 @@ def startReparse(): #will search through subdirectories of a certain root and wi
 
 
 def XMLparse(Path):
-    E_VALUE = pow(10,-20)
+    E_VALUE = pow(10,-40)
     result = NCBIXML.parse(open(Path))
     numBlastHits = 0
     hitsDict = {}
@@ -28,6 +29,7 @@ def XMLparse(Path):
             for hsp in alignment.hsps:
                 if hsp.expect <= E_VALUE:
                     numBlastHits += 1
+                    break
         hitsDict[blast_record.query] = numBlastHits
         numBlastHits = 0
     result.close()
@@ -47,7 +49,8 @@ def writeCSV(Path, Dict):
     CleanerKey = ''
     RowList = []
     writer = csv.writer(open(os.path.splitext(Path)[0]+'.csv','wb'))
-    writer.writerow(["Virus","Accession","Protein","Protein_id", "BlastHits", "uniprotID"])
+    writer.writerow(["Virus","Accession","Protein","Protein_id", "BlastHits",
+                    "uniprotID"])
     for key, value in Dict.items():
         if key.find('lcl') != -1 :
             genePos = key.find('protein=')
@@ -74,3 +77,4 @@ def writeCSV(Path, Dict):
     return["done"]
 
 startReparse()
+sqlGotestnew.findCSV()

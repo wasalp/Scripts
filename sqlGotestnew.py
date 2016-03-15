@@ -103,7 +103,8 @@ def protIDret(path):
         for i in  your_list:
             #ecriture du header
             if i[1].find("Accession") != -1:
-                writer.writerow([ "Virus","Accession","Protein","Protein_id","Hits","UniprotID", "Terms","GO code"])
+                writer.writerow([ "Virus","Accession","Protein","Protein_id",
+                                 "Hits","UniprotID", "Terms","GO code"])
             else:
                 #appelle a la fonction qui obtien les uniprotID pour chaque Refseq_protein
                 for c,k,v in getUNIPid(i[3]):
@@ -113,7 +114,3 @@ def protIDret(path):
                 writer.writerow(i)
 
     return[]
-
-
-
-findCSV()
