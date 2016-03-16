@@ -14,7 +14,7 @@ elif 'Windows' in platform.system():
 def reName(fileName):
     print fileName
     with open(fileName,"r") as fasta:
-        with open(os.path.splitext(fileName)[0]+"_clean.alignment","wb") as new:
+        with open(os.path.splitext(fileName)[0]+"_rn.fasta","wb") as new:
             for line in fasta:
                 if line.startswith('>'):
                     line = line.replace("['","")
@@ -32,10 +32,10 @@ def crawl(folder):
     for path,subdirs,files in os.walk(folder):
         for name in files:
             fileName = os.path.join(path,name).replace('\\', '/')
-            if ".alignment" in fileName and ".DS_Store" not in fileName and "clean" not in fileName:
+            if ".fasta" in fileName and ".DS_Store" not in fileName and "clean" not in fileName:
                 reName(fileName)
 
     return
 
 
-crawl("./project_temp")
+crawl("./project_temp/")
