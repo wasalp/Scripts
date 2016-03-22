@@ -18,8 +18,10 @@ def reName(fileName):
             for line in fasta:
                 if line.startswith('>'):
                     line = line.replace("['","")
-                    line = line[:line.find("]")-1]
-                    line = line[:line.find(".")]
+                    if "]" in line:
+                        line = line[:line.find("]")-1]
+                    if "." in line:
+                        line = line[:line.find(".")]
                     print line
                     new.write(line+ "\n")
                 else:
@@ -32,10 +34,11 @@ def crawl(folder):
     for path,subdirs,files in os.walk(folder):
         for name in files:
             fileName = os.path.join(path,name).replace('\\', '/')
+            print fileName
             if ".fasta" in fileName and ".DS_Store" not in fileName and "clean" not in fileName:
                 reName(fileName)
 
     return
 
 
-crawl("./project_temp/")
+crawl("./project_temp/dsDNA/Apapillomavirus/NP_041332.1")

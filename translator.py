@@ -14,7 +14,7 @@ def translate(fileName):
     shell = "perl ~/Desktop/bioinformatics/Scripts/translatoX.pl "
     shell = shell + "-i " + fileName
     shell = shell + " -o " + fileName
-    shell = shell + ' -t T -c 1 -g "-d5 a"'
+    shell = shell + ' -t T -c 1 -g "-b5 a"'
     print(shell)
     os.system(shell)
 
@@ -31,4 +31,4 @@ def crawl(folder):
     return
 
 
-crawl("./project_temp/")
+crawl("./project_temp/dsDNA/Apapillomavirus/NP_041332.1")
