@@ -12,6 +12,7 @@ def startReparse(): #will search through subdirectories of a certain root and wi
         for name in files:
             if name[0:len(name)-8].find(".") == -1 :#so we don't analyse hidden files
                 fileNames = os.path.join(path,name).replace('\\', '/')#clean the file name
+
                 if fileNames.find(".xml") != -1:#push fasta files only
                         outPutName = os.path.splitext(fileNames)[0] #this is simply a variable to name the XML output file
                         print(outPutName+'.xml')
@@ -30,6 +31,7 @@ def XMLparse(Path):
                 if hsp.expect <= E_VALUE:
                     numBlastHits += 1
                     break
+
         hitsDict[blast_record.query] = numBlastHits
         numBlastHits = 0
     result.close()
@@ -75,3 +77,4 @@ def writeCSV(Path, Dict):
         writer.writerow(RowList)
 
     return["done"]
+startReparse()

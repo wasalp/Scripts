@@ -11,7 +11,6 @@ def blastAll(): #will search through subdirectories of a certain root and will s
                 print(1)
                 if fileNames.find(".fasta") != -1:#push fasta files only
                         print(blastn(fileNames))#this will blast your file
-                        sys.exit()
     return["done blasting all"]
 
 def blastn(name): #this function will takes a filepath of a fasta file as an argument and does a local blastn with the nt database
@@ -20,7 +19,7 @@ def blastn(name): #this function will takes a filepath of a fasta file as an arg
     blast = NcbiblastxCommandline(cmd = "blastn", query= name,
                                 db="D:/database/nt/nt", evalue= E_VALUE,
                                 outfmt=5, out= outPutName + ".xml",
-                                maxtargetseqs= 100000)
+                                max_target_seqs= 100000)
     print('blasting '+ name)
     stdout,stderr = blast()
 

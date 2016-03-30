@@ -7,7 +7,7 @@
 import csv, os
 from collections import Counter
 
-os.chdir('D:/bioinformatics/research project')
+os.chdir('F:/bioinformatics/research_project')
 
 def GOTermCount() :
     CleanTermList = []
@@ -18,7 +18,7 @@ def GOTermCount() :
 
         for row in TermList:
 
-            TempString = row[6].strip('[]')
+            TempString = row[0].strip('[]')
             TempString = TempString.replace("transcription," , "transcription")
             TempString = TempString.replace("activity," , "activity")
 
@@ -38,7 +38,7 @@ def GOTermCount() :
 
         for row in TermList:
 
-            TempString = row[6].strip('[]')
+            TempString = row[0].strip('[]')
             TempString = TempString.replace("transcription," , "transcription")
             TempString = TempString.replace("activity," , "activity")
 
