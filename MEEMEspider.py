@@ -4,57 +4,70 @@ import csv,os
 
 
 
+def extract(fileName,treshold):
 
-
-def extract(fileName):
     Dict = {}
+    Matchlist = {}
     Plist = []
-    Dlist = []
+    splitFileName = fileName.split("/")
     with open(fileName,"rb") as f:
         reader = csv.reader(f)
         reader.next()
-        reader.next()
-        reader.next()
         for lines in reader:
             if lines[0] in Dict:
-                Plist.append(lines[2] +":"+lines[3])
+                Plist.append(float(lines[4]))
                 Dict[lines[0]] = Plist
             else:
                 Plist = []
-                Plist.append(lines[2] +":"+lines[3])
+                Plist.append(float(lines[4]))
                 Dict[lines[0]] = Plist
-    with open(fileName[:fileName.rfind("/")+1]+"Edge_support.csv") as f:
-        reader = csv.reader(f)
+
+
+    with open(searchDir(fileName[:fileName.rfind("/")+1],".branches"),"rb") as p:
+        reader = csv.reader(p)
+        reader.next()
+        reader.next()
         reader.next()
         for lines in reader:
-            if lines[0] in Dict:
-                Dlist.append(lines[2] +":"+lines[3])
-                Dict[lines[0]] = Plist
-            else:
-                Plist = []
-                Plist.append(lines[4])
-                Dict[lines[0]] = Plist
-                
-        for lines in reader
-        for i in range(5):
-            dictlist = Dict.items()
-            print(dictlist[i])
-            print("/n")
+            Matchlist[lines[0]] = 0
+    with open(fileName[:fileName.rfind("/")+1]+ "CoEvSel.csv", "wb") as f:
+        writer = csv.writer(f)
+        for i in Matchlist:
+            if i in Dict:
+                for vals in Dict[i]:
+                    if vals > treshold :
+                        print([i,vals])
+                        writer.writerow([i,vals])
+                        Alllist.append([splitFileName[5],splitFileName[6],
+                                 splitFileName[7],i,vals])
 
-
-
-def crawl(folder):
-    for path,subdirs,files in os.walk(folder):
-        for name in files:
-            fileName = os.path.join(path,name).replace('\\', '/')
-            if ".branches" in fileName:
-                extract(fileName)
 
     return
 
 
+def searchDir(folder, keyword):
+    for path,subdirs,files in os.walk(folder):
+        for name in files:
+            fileName = os.path.join(path,name).replace('\\', '/')
+            if keyword in fileName:
+                return fileName
 
+def crawl(folder, keyword):
+    for path,subdirs,files in os.walk(folder):
+        for name in files:
+            fileName = os.path.join(path,name).replace('\\', '/')
+            if keyword in fileName:
+                extract(fileName,0.80)
 
 Tk().withdraw()
+global directory
 directory = askdirectory()
-crawl(directory)
+global Alllist
+Alllist = []
+crawl(directory,"Edge_support.csv")
+print(Alllist)
+with open(directory+"/AllCoEvSel.csv","wb") as allCo:
+    allCoWriter = csv.writer(allCo)
+    allCoWriter.writerow(["type","virus","gene","site","value"])
+    for i in Alllist:
+        allCoWriter.writerow(i)
