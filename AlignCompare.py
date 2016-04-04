@@ -10,9 +10,14 @@ if 'Darwin' in platform.system():
 elif 'Windows' in platform.system():
     os.chdir("F:/bioinformatics")
 
+global infoList
+infoList = []
 
 def compareAlign(fileName):
-    print fileName
+    sequenceCount = 0
+    splitName = fileName.split("/")
+    geneList = [splitName[3],splitName[5][:splitName[5].find("_")],
+                splitName[6][splitName[6].rfind("[")+1:len(splitName[6])-1]]
     with open(os.path.splitext(fileName)[0] + "_filtered.fasta",'wb') as h:
         FastaRec = []
         foldName = fileName[:fileName.rfind('/')+1]
@@ -25,11 +30,16 @@ def compareAlign(fileName):
 
         fileName = foldName + fileName[fileName.rfind('/')+1:]
         for i in record:
-            if alignEm(refSeq,i) >= 0.7:
-                print i
+            if alignEm(refSeq,i) >= 0.9:
+                sequenceCount += 1
                 FastaRec.append(i)
 
         SeqIO.write(FastaRec, os.path.splitext(fileName)[0] + "_filtered.fasta" ,"fasta")
+
+    #3: type #5: virus #6 : protein
+    geneList.append(sequenceCount)
+    infoList.append(geneList)
+
     return
 
 def alignEm(refSeq, record):
@@ -56,10 +66,15 @@ def crawl(folder):
             fileName = os.path.join(path,name).replace('\\', '/')
             if ".fasta" in fileName and ".DS_Store" not in fileName:
                 if "_genes" in fileName and ".gb" not in fileName and "_filtered" not in fileName:
-                    if fileName.find("refseq") == -1 and "YP_001129465.1" in fileName:
+                    if fileName.find("refseq") == -1 :
                         compareAlign(fileName)
 
     return
 
+crawl("./research_project")
 
-crawl("./project_temp")
+with open("./research_project/filtered_seq_info.csv","wb") as f:
+    writer = csv.writer(f)
+    writer.writerow(["type","virus","gene","number sequence"])
+    for i in infoList:
+        writer.writerow(i)

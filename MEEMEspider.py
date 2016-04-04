@@ -1,6 +1,8 @@
 from Tkinter import Tk
 from tkFileDialog import askdirectory
 import csv,os
+import os,platform
+from Bio import SeqIO
 
 
 
@@ -30,6 +32,23 @@ def extract(fileName,treshold):
         reader.next()
         for lines in reader:
             Matchlist[lines[0]] = 0
+
+    record = SeqIO.parse(searchDir(fileName[:fileName.rfind("/")+1],".fasta.nt_cleanali.fasta"),"fasta")
+    seqlen = len(record.next())
+    SeqNum = 1
+    for i in record:
+        SeqNum += 1
+    print(SeqNum)
+
+    matchcount = 0
+    with open(fileName[:fileName.rfind("/")+1]+ "CoEvSel.csv", "wb") as f:
+        writer = csv.writer(f)
+        for i in Matchlist:
+            if i in Dict:
+                for vals in Dict[i]:
+                    if vals > treshold :
+                        matchcount += 1
+
     with open(fileName[:fileName.rfind("/")+1]+ "CoEvSel.csv", "wb") as f:
         writer = csv.writer(f)
         for i in Matchlist:
@@ -39,7 +58,7 @@ def extract(fileName,treshold):
                         print([i,vals])
                         writer.writerow([i,vals])
                         Alllist.append([splitFileName[5],splitFileName[6],
-                                 splitFileName[7],i,vals])
+                                 splitFileName[7],i,vals,seqlen,SeqNum,matchcount])
 
 
     return
@@ -68,6 +87,6 @@ crawl(directory,"Edge_support.csv")
 print(Alllist)
 with open(directory+"/AllCoEvSel.csv","wb") as allCo:
     allCoWriter = csv.writer(allCo)
-    allCoWriter.writerow(["type","virus","gene","site","value"])
+    allCoWriter.writerow(["type","virus","gene","site","value","seqlen","seqnum","hitnum"])
     for i in Alllist:
         allCoWriter.writerow(i)
