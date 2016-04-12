@@ -13,11 +13,8 @@ def treethis(fileName,analysis):
 
 def timekeeper(fileName,analysis):
     while True:
-        print(subprocess.check_output("ps aux|grep HYPHY|wc -l",shell=True))
-
         if int(subprocess.check_output("ps aux|grep HYPHY|wc -l",shell=True)) > 4:
-            print("sleeping")
-            time.sleep(5)
+            time.sleep(120)
         else:
             treethis(fileName,analysis)
             break
