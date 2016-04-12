@@ -14,7 +14,7 @@ def treethis(fileName):
 def getout(fileName):
 
     splitName = fileName.split("/")
-    outName = (fileName[:fileName.rfind("/")+1] + splitName[5] + ".tree")
+    outName = (fileName[:fileName.rfind("/")+1] + splitName[7] + ".tree")
     return outName
 
 def crawl(folder, whitelist,blacklist):
@@ -28,4 +28,4 @@ def crawl(folder, whitelist,blacklist):
 Tk().withdraw()
 directory = askdirectory()
 
-crawl(directory, "rn.fasta.nt_cleanali.fasta", ".tree")
+crawl(directory, "rn.fasta.nt_cleanali_rn.fasta", ".tree")

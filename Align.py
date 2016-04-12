@@ -4,6 +4,8 @@ from Bio import SeqIO, AlignIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Align.Applications import MuscleCommandline
+import Tkinter as tk
+from tkFileDialog import askdirectory
 
 if 'Darwin' in platform.system():
     os.chdir("/Users/louis/Desktop/bioinformatics/")
@@ -22,23 +24,27 @@ def reName(fileName):
                         line = line[:line.find("]")-1]
                     if "." in line:
                         line = line[:line.find(".")]
+                    line = line[:line.rfind("/")]
                     print line
-                    new.write(line+ "\n")
+                    new.write(line+"\n")
                 else:
                     new.write(line)
 
     return
 
 
-def crawl(folder):
+def crawl(folder, whitelist,blacklist="aaaaaaaaaaaaaaaaaaa"):
     for path,subdirs,files in os.walk(folder):
         for name in files:
             fileName = os.path.join(path,name).replace('\\', '/')
-            print fileName
-            if ".fasta" in fileName and ".DS_Store" not in fileName and "clean" not in fileName:
+            if whitelist in fileName and blacklist not in fileName:
                 reName(fileName)
 
     return
 
+root = tk.Tk()
+root.withdraw()
+directory = askdirectory()
+root.destroy()
 
-crawl("./project_temp/dsDNA/Apapillomavirus/NP_041332.1")
+crawl(directory,"rn.fasta.nt_cleanali.fasta")
