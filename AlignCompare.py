@@ -56,10 +56,10 @@ def crawl(folder):
             fileName = os.path.join(path,name).replace('\\', '/')
             if ".fasta" in fileName and ".DS_Store" not in fileName:
                 if "_genes" in fileName and ".gb" not in fileName and "_filtered" not in fileName:
-                    if fileName.find("refseq") == -1 and "YP_001129465.1" in fileName:
+                    if fileName.find("refseq") == -1 :
                         compareAlign(fileName)
 
     return
 
 
-crawl("./project_temp")
+crawl("./research_project")
