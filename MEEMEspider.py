@@ -71,11 +71,9 @@ global directory
 directory = askdirectory()
 global Alllist
 Alllist = []
-for y in range(10,20,1):
-    b = float(y)
-    for i in range(10,20,1):
-        j = float(i)
-        crawl(directory,"Edge_support.csv",j/20,b/20)
+for i in range(1,99,1):
+    j = float(i)
+    crawl(directory,"Edge_support.csv",j/100,0.95)
 
 
 with open(directory+"/AllCoEvSel.csv","wb") as allCo:

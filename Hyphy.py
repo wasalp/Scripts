@@ -46,5 +46,6 @@ root.withdraw()
 directory = askdirectory()
 root.destroy()
 
-crawl(directory, "rn.fasta.nt_cleanali_rn.fasta", ".tree", analysis="MEME")
+
 crawl(directory, "rn.fasta.nt_cleanali_rn.fasta", ".tree", analysis="SPIDER")
+crawl(directory, "rn.fasta.nt_cleanali_rn.fasta", ".tree", analysis="MEME")

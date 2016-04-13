@@ -1,5 +1,6 @@
 import subprocess, platform, os,shlex
-
+import Tkinter as tk
+from tkFileDialog import askdirectory
 
 
 
@@ -25,10 +26,14 @@ def crawl(folder):
     for path,subdirs,files in os.walk(folder):
         for name in files:
             fileName = os.path.join(path,name).replace('\\', '/')
-            if "_rn.fasta" in fileName and ".DS_Store" not in fileName and "clean" not in fileName:
+            if "filtered.fasta" in fileName and ".DS_Store" not in fileName and "clean" not in fileName:
                 translate(fileName)
 
     return
 
+root = tk.Tk()
+root.withdraw()
+directory = askdirectory()
+root.destroy()
 
-crawl("./project_temp/dsDNA/Apapillomavirus/NP_041332.1")
+crawl(directory)
