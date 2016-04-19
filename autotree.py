@@ -21,6 +21,7 @@ def crawl(folder, whitelist,blacklist):
     for path,subdirs,files in os.walk(folder):
         for name in files:
             fileName = os.path.join(path,name).replace('\\', '/')
+            print(fileName)
             if whitelist in fileName and blacklist not in fileName:
                 treethis(fileName)
 
@@ -28,4 +29,4 @@ def crawl(folder, whitelist,blacklist):
 Tk().withdraw()
 directory = askdirectory()
 
-crawl(directory, "rn.fasta.nt_cleanali_rn.fasta", ".tree")
+crawl(directory, "fasta.nt_cleanali_rn.fasta", ".tree")

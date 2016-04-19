@@ -23,8 +23,9 @@ def reName(fileName):
                     if "]" in line:
                         line = line[:line.find("]")-1]
                     if "." in line:
-                        line = line[:line.find(".")]
+                        line = line[:line.find(".")+1]
                     line = line[:line.rfind("/")]
+                    line = line.replace("'","")
                     print line
                     new.write(line+"\n")
                 else:
@@ -47,4 +48,4 @@ root.withdraw()
 directory = askdirectory()
 root.destroy()
 
-crawl(directory,"rn.fasta.nt_cleanali.fasta")
+crawl(directory,"fasta.nt_cleanali.fasta")

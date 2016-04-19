@@ -14,7 +14,7 @@ def treethis(fileName,analysis):
 def timekeeper(fileName,analysis):
     while True:
         if int(subprocess.check_output("ps aux|grep HYPHY|wc -l",shell=True)) > 4:
-            time.sleep(120)
+            time.sleep(10)
         else:
             treethis(fileName,analysis)
             break
@@ -27,7 +27,7 @@ def getout(fileName,analysis):
     if not os.path.exists(fileName[:fileName.rfind("/")+1] + analysis):
         os.makedirs(fileName[:fileName.rfind("/")+1] + analysis)
     splitName = fileName.split("/")
-    outName = (fileName[:fileName.rfind("/")+1] + analysis + "/" + splitName[7])
+    outName = (fileName[:fileName.rfind("/")+1] + analysis + "/" + splitName[10])
     return outName
 
 def crawl(folder, whitelist,blacklist="aaaaaaaaaaaaaaaaaaa", init=0,analysis=""):
@@ -47,5 +47,5 @@ directory = askdirectory()
 root.destroy()
 
 
-crawl(directory, "rn.fasta.nt_cleanali_rn.fasta", ".tree", analysis="SPIDER")
-crawl(directory, "rn.fasta.nt_cleanali_rn.fasta", ".tree", analysis="MEME")
+crawl(directory, "fasta.nt_cleanali_rn.fasta", ".tree", analysis="SPIDER")
+crawl(directory, "fasta.nt_cleanali_rn.fasta", ".tree", analysis="MEME")
