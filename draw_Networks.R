@@ -26,7 +26,7 @@ for(files in filelist){
   thres_list <- seq(0.05,top,0.025)
 
     for(f in thres_list){
-    gentype1<-virtype1<-average1 <- transitivity1 <- between1 <- alpha1 <- central1 <- meandegree1 <- powerlaw_slope1 <- powerlaw_alpha1 <- c()
+    assortativity_degree1<- eccentricity1 <- strength1 <- diameter1 <- gentype1<-virtype1<-average1 <- transitivity1 <- between1 <- alpha1 <- central1 <- meandegree1 <- powerlaw_slope1 <- powerlaw_alpha1 <- c()
     tempsub <- subset(orderedpairMat,orderedpairMat$Site1...Site2 >= f)
     pairAMat_adj_sor <- tempsub
     
@@ -106,13 +106,14 @@ for(files in filelist){
     E(g)$width <- log10_weights + min(log10_weights) + 1
     E(g)$color <- "black" 
     V(g)$color <-"white"
+    #V(g)$label.main=c("treshold = ", f,strsplit(files,"/")[[1]][2],sttkrsplit(files,"/")[[1]][3],strsplit(files,"/")[[1]][5])
     V(g)$label.color="black"
 
-    if(isTRUE(all.equal(f,0.7))){
-      print("do it")
-      plot(g,main=c("treshold = ", f))
+    if(isTRUE(all.equal(f,0.85))|isTRUE(all.equal(f,0.1))){
+      #plot(g,main=c("treshold = ", f,strsplit(files,"/")[[1]][2],sttkrsplit(files,"/")[[1]][3],strsplit(files,"/")[[1]][5]))
       # now draw network: solution 3'
-      plot(g, layout=layout.fruchterman.reingold(g))
+      title <- paste("treshold =", f,strsplit(files,"/")[[1]][2],strsplit(files,"/")[[1]][3],strsplit(files,"/")[[1]][5])
+      plot(g, layout=layout.fruchterman.reingold(g),vertex.label=NA, main=title)
     }
     meandegree1 <- c(meandegree1, mean(degree(g)))
     alpha1 <- c(alpha1,mean(alpha_centrality(g, nodes = V(g), loops = FALSE,exo = 1, weights = NULL, tol = 1e-07, sparse = TRUE)))	
@@ -120,9 +121,15 @@ for(files in filelist){
     between1<- c(between1,mean(betweenness(g)))
     average1 <- c(average1,average.path.length(g, directed=TRUE, unconnected=TRUE))
     transitivity1 <- c(transitivity1,mean(transitivity(g)))
+    diameter1 <- c(diameter1,mean(diameter(g)))
+    strength1 <- c(strength1,mean(strength(g)))
+    eccentricity1 <- c(eccentricity1,mean(eccentricity(g)))
+    assortativity_degree1 <- c(assortativity_degree1,mean(assortativity_degree(g)))
     virtype1 <- c(virtype1,strsplit(files,"/")[[1]][2])
     gentype1 <- c(gentype1,strsplit(files,"/")[[1]][5])
-    tempfram <- data.frame(virtype= virtype1,average=average1,transitivity=transitivity1,between=between1,central=central1,meandegree=meandegree1,alpha=alpha1,SpiderTreshold=f,gentype=gentype1)
+    tempfram <- data.frame(virtype= virtype1,average=average1,transitivity=transitivity1,between=between1,
+                           central=central1,meandegree=meandegree1,diameter=diameter1,strength=strength1,eccentricity=eccentricity1,assortativity_degree=assortativity_degree1, alpha=alpha1,SpiderTreshold=f,
+                           gentype=gentype1)
     sumframe <- rbind(sumframe,tempfram)
     }
   
@@ -132,173 +139,195 @@ for(files in filelist){
 dev.off()
 dsDNAsum <- subset(sumframe,sumframe$virtype == "dsDNA")
 ssRNAsum <- subset(sumframe,sumframe$virtype == "ssRNA-")
-dsDNAmean <- data.frame(average=c(),transitivity=c(),between=c(),central=c(),meandegree=c(),SpiderTreshold=c())
-ssRNAmean <- data.frame(average=c(),transitivity=c(),between=c(),central=c(),meandegree=c(),SpiderTreshold=c())
+
+dsDNAother <- subset(dsDNAsum,dsDNAsum$gentype == "other")
+dsDNAGP <- subset(dsDNAsum,dsDNAsum$gentype == "GP")
+ssRNAother <- subset(ssRNAsum,ssRNAsum$gentype == "other")
+ssRNAGP <- subset(ssRNAsum,ssRNAsum$gentype == "GP")
+
+dsDNAothermean <- data.frame(average=c(),transitivity=c(),between=c(),central=c(),meandegree=c(),diameter=c(),strength=c(),eccentricity=c(),assortativity_degree=c(),SpiderTreshold=c())
+dsDNAGPmean <- data.frame(average=c(),transitivity=c(),between=c(),central=c(),meandegree=c(),diameter=c(),strength=c(),eccentricity=c(),assortativity_degree=c(),SpiderTreshold=c())
+ssRNAothermean <- data.frame(average=c(),transitivity=c(),between=c(),central=c(),meandegree=c(),diameter=c(),strength=c(),eccentricity=c(),assortativity_degree=c(),SpiderTreshold=c())
+ssRNAGPmean <- data.frame(average=c(),transitivity=c(),between=c(),central=c(),meandegree=c(),diameter=c(),strength=c(),eccentricity=c(),assortativity_degree=c(),SpiderTreshold=c())
+
 for(i in seq(0.05,0.95,0.05)){
-  tempds <- subset(dsDNAsum,dsDNAsum$SpiderTreshold == i)
-  tempss <- subset(ssRNAsum,dsDNAsum$SpiderTreshold == i)
+  tempdsother <- subset(dsDNAother,dsDNAother$SpiderTreshold == i)
+  tempdsGP <- subset(dsDNAGP,dsDNAGP$SpiderTreshold == i)
+  
+  tempssother <- subset(ssRNAother,ssRNAother$SpiderTreshold == i)
+  tempssGP <- subset(ssRNAGP,ssRNAGP$SpiderTreshold == i)
+  
   #DNA
-  meandegree1 <- mean(tempds$meandegree)
-  alpha1 <- mean(tempds$alpha)	
-  central1 <- mean(tempds$central)
-  between1<- mean(tempds$between)
-  average1 <- mean(tempds$average)
-  transitivity1 <- mean(tempds$transitivity)
-  tempfram <- data.frame(average=average1,transitivity=transitivity1,between=between1,central=central1,meandegree=meandegree1,SpiderTreshold=i)
-  dsDNAmean <- rbind(dsDNAmean,tempfram)
+    #other
+  meandegree1 <- mean(tempdsother$meandegree)
+  alpha1 <- mean(tempdsother$alpha)	
+  central1 <- mean(tempdsother$central)
+  between1<- mean(tempdsother$between)
+  average1 <- mean(tempdsother$average)
+  transitivity1 <- mean(tempdsother$transitivity)
+  diameter1 <- mean(tempdsother$diameter)
+  strength1 <- mean(tempdsother$strength)
+  eccentricity1 <- mean(tempdsother$eccentricity)
+  assortativity_degree1 <- mean(tempdsother$assortativity_degree)
+  tempfram <- data.frame(average=average1,transitivity=transitivity1,between=between1,central=central1,meandegree=meandegree1,diameter=diameter1,strength=strength1,eccentricity=eccentricity1,assortativity_degree=assortativity_degree1,SpiderTreshold=i)
+  dsDNAothermean <- rbind(dsDNAothermean,tempfram)
+    #GP
+  meandegree1 <- mean(tempdsGP$meandegree)
+  alpha1 <- mean(tempdsGP$alpha)	
+  central1 <- mean(tempdsGP$central)
+  between1<- mean(tempdsGP$between)
+  average1 <- mean(tempdsGP$average)
+  transitivity1 <- mean(tempdsGP$transitivity)
+  diameter1 <- mean(tempdsGP$diameter)
+  strength1 <- mean(tempdsGP$strength)
+  eccentricity1 <- mean(tempdsGP$eccentricity)
+  assortativity_degree1 <- mean(tempdsGP$assortativity_degree)
+  tempfram <- data.frame(average=average1,transitivity=transitivity1,between=between1,central=central1,meandegree=meandegree1,diameter=diameter1,strength=strength1,eccentricity=eccentricity1,assortativity_degree=assortativity_degree1,SpiderTreshold=i)
+  dsDNAGPmean <- rbind(dsDNAGPmean,tempfram)
+  
   #RNA
-  meandegree1 <- mean(tempss$meandegree)
-  alpha1 <- mean(tempss$alpha)	
-  central1 <- mean(tempss$central)
-  between1<- mean(tempss$between)
-  average1 <- mean(tempss$average)
-  transitivity1 <- mean(tempss$transitivity)
-  tempfram <- data.frame(average=average1,transitivity=transitivity1,between=between1,central=central1,meandegree=meandegree1,SpiderTreshold=i)
-  ssRNAmean <- rbind(ssRNAmean,tempfram)
+    #other
+  meandegree1 <- mean(tempssother$meandegree)
+  alpha1 <- mean(tempssother$alpha)	
+  central1 <- mean(tempssother$central)
+  between1<- mean(tempssother$between)
+  average1 <- mean(tempssother$average)
+  transitivity1 <- mean(tempssother$transitivity)
+  diameter1 <- mean(tempssother$diameter)
+  strength1 <- mean(tempssother$strength)
+  eccentricity1 <- mean(tempssother$eccentricity)
+  assortativity_degree1 <- mean(tempssother$assortativity_degree)
+  tempfram <- data.frame(average=average1,transitivity=transitivity1,between=between1,central=central1,meandegree=meandegree1,diameter=diameter1,strength=strength1,eccentricity=eccentricity1,assortativity_degree=assortativity_degree1,SpiderTreshold=i)
+  ssRNAothermean <- rbind(ssRNAothermean,tempfram)
+    #GP
+  meandegree1 <- mean(tempssGP$meandegree)
+  alpha1 <- mean(tempssGP$alpha)	
+  central1 <- mean(tempssGP$central)
+  between1<- mean(tempssGP$between)
+  average1 <- mean(tempssGP$average)
+  transitivity1 <- mean(tempssGP$transitivity)
+  diameter1 <- mean(tempssGP$diameter)
+  strength1 <- mean(tempssGP$strength)
+  eccentricity1 <- mean(tempssGP$eccentricity)
+  assortativity_degree1 <- mean(tempssGP$assortativity_degree)
+  tempfram <- data.frame(average=average1,transitivity=transitivity1,between=between1,central=central1,meandegree=meandegree1,diameter=diameter1,strength=strength1,eccentricity=eccentricity1,assortativity_degree=assortativity_degree1,SpiderTreshold=i)
+  ssRNAGPmean <- rbind(ssRNAGPmean,tempfram)
 }
 pdf("network.pdf", width=24, height=16)
-panel <- c()
-for(i in c(1:5)){
-  if(i == 1){
-    q1 <- ggplot()
-    q1 <- q1 + geom_smooth(data=dsDNAmean, aes(x=SpiderTreshold, y=dsDNAmean$average,xmin=0,xmax=1),
-                                   fill = 1,colour=1,size=1) 
-    q1 <- q1 + geom_smooth(data=ssRNAmean, aes(x=SpiderTreshold, y=ssRNAmean$average,xmin=0,xmax=1),
-                                   fill =7,colour=7, size=1) + 
-      labs(title=colnames(dsDNAmean[i]),y=c(colnames(dsDNAmean[i])),x="Posterior probability threshold")+
+
+    q1 <- ggplot()+
+    geom_smooth(data=dsDNAothermean, aes(x=SpiderTreshold, y=dsDNAothermean[1],xmin=0,xmax=1),
+                                   fill = 1,colour=1,size=1) +
+    geom_smooth(data=dsDNAGPmean, aes(x=SpiderTreshold, y=dsDNAGPmean[1],xmin=0,xmax=1),
+                                   fill =2,colour=2, size=1) + 
+    geom_smooth(data=ssRNAothermean, aes(x=SpiderTreshold, y=ssRNAothermean[1],xmin=0,xmax=1),
+                           fill = 4,colour=4,size=1) +
+    geom_smooth(data=ssRNAGPmean, aes(x=SpiderTreshold, y=ssRNAGPmean[1],xmin=0,xmax=1),
+                           fill =6,colour=6, size=1) +
+      labs(title=colnames(dsDNAothermean[1]),y=colnames(dsDNAothermean[1]),x="Posterior probability threshold")+
       theme_bw()
-  }
+
+    q2 <- ggplot()+
+      geom_smooth(data=dsDNAothermean, aes(x=SpiderTreshold, y=dsDNAothermean[2],xmin=0,xmax=1),
+                  fill = 1,colour=1,size=1) +
+      geom_smooth(data=dsDNAGPmean, aes(x=SpiderTreshold, y=dsDNAGPmean[2],xmin=0,xmax=1),
+                  fill =2,colour=2, size=1) + 
+      geom_smooth(data=ssRNAothermean, aes(x=SpiderTreshold, y=ssRNAothermean[2],xmin=0,xmax=1),
+                  fill = 4,colour=4,size=1) +
+      geom_smooth(data=ssRNAGPmean, aes(x=SpiderTreshold, y=ssRNAGPmean[2],xmin=0,xmax=1),
+                  fill =6,colour=6, size=1) +
+      labs(title=colnames(dsDNAothermean[2]),y=colnames(dsDNAothermean[2]),x="Posterior probability threshold")+
+      theme_bw()
+
+    q3 <- ggplot()+
+      geom_smooth(data=dsDNAothermean, aes(x=SpiderTreshold, y=dsDNAothermean[3],xmin=0,xmax=1),
+                  fill = 1,colour=1,size=1) +
+      geom_smooth(data=dsDNAGPmean, aes(x=SpiderTreshold, y=dsDNAGPmean[3],xmin=0,xmax=1),
+                  fill =2,colour=2, size=1) + 
+      geom_smooth(data=ssRNAothermean, aes(x=SpiderTreshold, y=ssRNAothermean[3],xmin=0,xmax=1),
+                  fill = 4,colour=4,size=1) +
+      geom_smooth(data=ssRNAGPmean, aes(x=SpiderTreshold, y=ssRNAGPmean[3],xmin=0,xmax=1),
+                  fill =6,colour=6, size=1) +
+      labs(title=colnames(dsDNAothermean[3]),y=colnames(dsDNAothermean[3]),x="Posterior probability threshold")+
+      theme_bw()
+
+    q4 <- ggplot()+
+      geom_smooth(data=dsDNAothermean, aes(x=SpiderTreshold, y=dsDNAothermean[4],xmin=0,xmax=1),
+                  fill = 1,colour=1,size=1) +
+      geom_smooth(data=dsDNAGPmean, aes(x=SpiderTreshold, y=dsDNAGPmean[4],xmin=0,xmax=1),
+                  fill =2,colour=2, size=1) + 
+      geom_smooth(data=ssRNAothermean, aes(x=SpiderTreshold, y=ssRNAothermean[4],xmin=0,xmax=1),
+                  fill = 4,colour=4,size=1) +
+      geom_smooth(data=ssRNAGPmean, aes(x=SpiderTreshold, y=ssRNAGPmean[4],xmin=0,xmax=1),
+                  fill =6,colour=6, size=1) +
+      labs(title=colnames(dsDNAothermean[4]),y=colnames(dsDNAothermean[4]),x="Posterior probability threshold")+
+      theme_bw()
   
-  if(i == 2){
-    q2 <- ggplot()
-    q2 <- q2 + geom_smooth(data=dsDNAmean, aes(x=SpiderTreshold, y=dsDNAmean$transitivity,xmin=0,xmax=1),
-                                   fill = 1,colour=1,size=1) 
-    q2 <- q2 + geom_smooth(data=ssRNAmean, aes(x=SpiderTreshold, y=ssRNAmean$transitivity,xmin=0,xmax=1),
-                                   fill =7,colour=7, size=1) + 
-      labs(title=colnames(dsDNAmean[i]),y=c(colnames(dsDNAmean[i])),x="Posterior probability threshold")+
+
+    q5 <- ggplot()+
+      geom_smooth(data=dsDNAothermean, aes(x=SpiderTreshold, y=dsDNAothermean[5],xmin=0,xmax=1),
+                  fill = 1,colour=1,size=1) +
+      geom_smooth(data=dsDNAGPmean, aes(x=SpiderTreshold, y=dsDNAGPmean[5],xmin=0,xmax=1),
+                  fill =2,colour=2, size=1) + 
+      geom_smooth(data=ssRNAothermean, aes(x=SpiderTreshold, y=ssRNAothermean[5],xmin=0,xmax=1),
+                  fill = 4,colour=4,size=1) +
+      geom_smooth(data=ssRNAGPmean, aes(x=SpiderTreshold, y=ssRNAGPmean[5],xmin=0,xmax=1),
+                  fill =6,colour=6, size=1) +
+      labs(title=colnames(dsDNAothermean[5]),y=colnames(dsDNAothermean[5]),x="Posterior probability threshold")+
       theme_bw()
-  }
   
-  if(i == 3){
-    q3<- ggplot()
-    q3 <- q3 + geom_smooth(data=dsDNAmean, aes(x=SpiderTreshold, y=dsDNAmean$between,xmin=0,xmax=1),
-                                   fill = 1,colour=1, size=1) 
-    q3 <- q3 + geom_smooth(data=ssRNAmean, aes(x=SpiderTreshold, y=ssRNAmean$between,xmin=0,xmax=1),
-                                   fill =7,colour=7, size=1) + 
-      labs(title=colnames(dsDNAmean[i]),y=c(colnames(dsDNAmean[i])),x="Posterior probability threshold")+
-      theme_bw()
-  }
   
-  if(i == 4){
-    q4 <- ggplot()
-    q4 <- q4 + geom_smooth(data=dsDNAmean, aes(x=SpiderTreshold, y=dsDNAmean$central,xmin=0,xmax=1),
-                                   fill = 1,colour=1, size=1) 
-    q4 <- q4 + geom_smooth(data=ssRNAmean, aes(x=SpiderTreshold, y=ssRNAmean$central,xmin=0,xmax=1),
-                                   fill =7,colour=7, size=1) + 
-      labs(title=colnames(dsDNAmean[i]),y=c(colnames(dsDNAmean[i])),x="Posterior probability threshold")+
-      theme_bw()
-  }
+  q6 <- ggplot()+
+    geom_smooth(data=dsDNAothermean, aes(x=SpiderTreshold, y=dsDNAothermean[6],xmin=0,xmax=1),
+                fill = 1,colour=1,size=1) +
+    geom_smooth(data=dsDNAGPmean, aes(x=SpiderTreshold, y=dsDNAGPmean[6],xmin=0,xmax=1),
+                fill =2,colour=2, size=1) + 
+    geom_smooth(data=ssRNAothermean, aes(x=SpiderTreshold, y=ssRNAothermean[6],xmin=0,xmax=1),
+                fill = 4,colour=4,size=1) +
+    geom_smooth(data=ssRNAGPmean, aes(x=SpiderTreshold, y=ssRNAGPmean[6],xmin=0,xmax=1),
+                fill =6,colour=6, size=1) +
+    labs(title=colnames(dsDNAothermean[6]),y=colnames(dsDNAothermean[6]),x="Posterior probability threshold")+
+    theme_bw()
   
-  if(i == 5){
-    q5 <- ggplot()
-    q5 <- q5 + geom_smooth(data=dsDNAmean, aes(x=SpiderTreshold, y=dsDNAmean$meandegree,xmin=0,xmax=1),
-                                   fill = 1,colour=1, size=1) 
-    q5 <- q5 + geom_smooth(data=ssRNAmean, aes(x=SpiderTreshold, y=ssRNAmean$meandegree,xmin=0,xmax=1),
-                                   fill =7,colour=7, size=1) + 
-      labs(title=colnames(dsDNAmean[i]),y=c(colnames(dsDNAmean[i])),x="Posterior probability threshold")+
-      theme_bw()
-  }
+  q7 <- ggplot()+
+    geom_smooth(data=dsDNAothermean, aes(x=SpiderTreshold, y=dsDNAothermean[7],xmin=0,xmax=1),
+                fill = 1,colour=1,size=1) +
+    geom_smooth(data=dsDNAGPmean, aes(x=SpiderTreshold, y=dsDNAGPmean[7],xmin=0,xmax=1),
+                fill =2,colour=2, size=1) + 
+    geom_smooth(data=ssRNAothermean, aes(x=SpiderTreshold, y=ssRNAothermean[7],xmin=0,xmax=1),
+                fill = 4,colour=4,size=1) +
+    geom_smooth(data=ssRNAGPmean, aes(x=SpiderTreshold, y=ssRNAGPmean[7],xmin=0,xmax=1),
+                fill =6,colour=6, size=1) +
+    labs(title=colnames(dsDNAothermean[7]),y=colnames(dsDNAothermean[7]),x="Posterior probability threshold")+
+    theme_bw()
+  
+  q8 <- ggplot()+
+    geom_smooth(data=dsDNAothermean, aes(x=SpiderTreshold, y=dsDNAothermean[8],xmin=0,xmax=1),
+                fill = 1,colour=1,size=1) +
+    geom_smooth(data=dsDNAGPmean, aes(x=SpiderTreshold, y=dsDNAGPmean[8],xmin=0,xmax=1),
+                fill =2,colour=2, size=1) + 
+    geom_smooth(data=ssRNAothermean, aes(x=SpiderTreshold, y=ssRNAothermean[8],xmin=0,xmax=1),
+                fill = 4,colour=4,size=1) +
+    geom_smooth(data=ssRNAGPmean, aes(x=SpiderTreshold, y=ssRNAGPmean[8],xmin=0,xmax=1),
+                fill =6,colour=6, size=1) +
+    labs(title=colnames(dsDNAothermean[8]),y=colnames(dsDNAothermean[8]),x="Posterior probability threshold")+
+    theme_bw()
+  
+  q9 <- ggplot()+
+    geom_smooth(data=dsDNAothermean, aes(x=SpiderTreshold, y=dsDNAothermean[9],xmin=0,xmax=1),
+                fill = 1,colour=1,size=1) +
+    geom_smooth(data=dsDNAGPmean, aes(x=SpiderTreshold, y=dsDNAGPmean[9],xmin=0,xmax=1),
+                fill =2,colour=2, size=1) + 
+    geom_smooth(data=ssRNAothermean, aes(x=SpiderTreshold, y=ssRNAothermean[9],xmin=0,xmax=1),
+                fill = 4,colour=4,size=1) +
+    geom_smooth(data=ssRNAGPmean, aes(x=SpiderTreshold, y=ssRNAGPmean[9],xmin=0,xmax=1),
+                fill =6,colour=6, size=1) +
+    labs(title=colnames(dsDNAothermean[9]),y=colnames(dsDNAothermean[9]),x="Posterior probability threshold")+
+    theme_bw()
   
           
-}
 
-grid.arrange(q1,q2,q3,q4,q5)
+
+grid.arrange(q1,q2,q3,q4,q5,q6,q7,q8,q9)
 dev.off()
 
-
-
-#GENE TYPE#
-dsDNAsum <- subset(sumframe,sumframe$gentype == "other")
-ssRNAsum <- subset(sumframe,sumframe$gentype == "GP")
-dsDNAmean <- data.frame(average=c(),transitivity=c(),between=c(),central=c(),meandegree=c(),SpiderTreshold=c())
-ssRNAmean <- data.frame(average=c(),transitivity=c(),between=c(),central=c(),meandegree=c(),SpiderTreshold=c())
-for(i in seq(0.05,0.95,0.05)){
-  tempds <- subset(dsDNAsum,dsDNAsum$SpiderTreshold == i)
-  tempss <- subset(ssRNAsum,dsDNAsum$SpiderTreshold == i)
-  #Other
-  meandegree1 <- mean(tempds$meandegree)
-  alpha1 <- mean(tempds$alpha)	
-  central1 <- mean(tempds$central)
-  between1<- mean(tempds$between)
-  average1 <- mean(tempds$average)
-  transitivity1 <- mean(tempds$transitivity)
-  tempfram <- data.frame(average=average1,transitivity=transitivity1,between=between1,central=central1,meandegree=meandegree1,SpiderTreshold=i)
-  dsDNAmean <- rbind(dsDNAmean,tempfram)
-  #GP
-  meandegree1 <- mean(tempss$meandegree)
-  alpha1 <- mean(tempss$alpha)	
-  central1 <- mean(tempss$central)
-  between1<- mean(tempss$between)
-  average1 <- mean(tempss$average)
-  transitivity1 <- mean(tempss$transitivity)
-  tempfram <- data.frame(average=average1,transitivity=transitivity1,between=between1,central=central1,meandegree=meandegree1,SpiderTreshold=i)
-  ssRNAmean <- rbind(ssRNAmean,tempfram)
-}
-pdf("gene.pdf", width=24, height=16)
-panel <- c()
-for(i in c(1:5)){
-  if(i == 1){
-    q1 <- ggplot()
-    q1 <- q1 + geom_smooth(data=dsDNAmean, aes(x=SpiderTreshold, y=dsDNAmean$average,xmin=0,xmax=1),
-                           fill = 1,colour=1,size=1) 
-    q1 <- q1 + geom_smooth(data=ssRNAmean, aes(x=SpiderTreshold, y=ssRNAmean$average,xmin=0,xmax=1),
-                           fill =7,colour=7, size=1) + 
-      labs(title=colnames(dsDNAmean[i]),y=c(colnames(dsDNAmean[i])),x="Posterior probability threshold")+
-      theme_bw()
-  }
-  
-  if(i == 2){
-    q2 <- ggplot()
-    q2 <- q2 + geom_smooth(data=dsDNAmean, aes(x=SpiderTreshold, y=dsDNAmean$transitivity,xmin=0,xmax=1),
-                           fill = 1,colour=1,size=1) 
-    q2 <- q2 + geom_smooth(data=ssRNAmean, aes(x=SpiderTreshold, y=ssRNAmean$transitivity,xmin=0,xmax=1),
-                           fill =7,colour=7, size=1) + 
-      labs(title=colnames(dsDNAmean[i]),y=c(colnames(dsDNAmean[i])),x="Posterior probability threshold")+
-      theme_bw()
-  }
-  
-  if(i == 3){
-    q3<- ggplot()
-    q3 <- q3 + geom_smooth(data=dsDNAmean, aes(x=SpiderTreshold, y=dsDNAmean$between,xmin=0,xmax=1),
-                           fill = 1,colour=1, size=1) 
-    q3 <- q3 + geom_smooth(data=ssRNAmean, aes(x=SpiderTreshold, y=ssRNAmean$between,xmin=0,xmax=1),
-                           fill =7,colour=7, size=1) + 
-      labs(title=colnames(dsDNAmean[i]),y=c(colnames(dsDNAmean[i])),x="Posterior probability threshold")+
-      theme_bw()
-  }
-  
-  if(i == 4){
-    q4 <- ggplot()
-    q4 <- q4 + geom_smooth(data=dsDNAmean, aes(x=SpiderTreshold, y=dsDNAmean$central,xmin=0,xmax=1),
-                           fill = 1,colour=1, size=1) 
-    q4 <- q4 + geom_smooth(data=ssRNAmean, aes(x=SpiderTreshold, y=ssRNAmean$central,xmin=0,xmax=1),
-                           fill =7,colour=7, size=1) + 
-      labs(title=colnames(dsDNAmean[i]),y=c(colnames(dsDNAmean[i])),x="Posterior probability threshold")+
-      theme_bw()
-  }
-  
-  if(i == 5){
-    q5 <- ggplot()
-    q5 <- q5 + geom_smooth(data=dsDNAmean, aes(x=SpiderTreshold, y=dsDNAmean$meandegree,xmin=0,xmax=1),
-                           fill = 1,colour=1, size=1) 
-    q5 <- q5 + geom_smooth(data=ssRNAmean, aes(x=SpiderTreshold, y=ssRNAmean$meandegree,xmin=0,xmax=1),
-                           fill =7,colour=7, size=1) + 
-      labs(title=colnames(dsDNAmean[i]),y=c(colnames(dsDNAmean[i])),x="Posterior probability threshold")+
-      theme_bw()
-  }
-  
-  
-}
-
-grid.arrange(q1,q2,q3,q4,q5)
-dev.off()
